@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Habit-Tracker": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\conwuli\\source\\repos\\Habit-Tracker\\Habit-Tracker"
+    }
+  }
+}
