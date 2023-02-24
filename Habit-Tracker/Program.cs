@@ -19,10 +19,13 @@ class Program
 
 
             tableCmd.CommandText =
-                @"CREATE TABLE IF NOT EXISTS drink_water (
+                @"CREATE TABLE IF NOT EXISTS habits (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Date TEXT,
-                        Quantity INTEGER
+                        Name TEXT,
+                        Habit TEXT,
+                        Quantity INTEGER,
+                        Unit TEXT
                         )";
 
             tableCmd.ExecuteNonQuery();
@@ -87,9 +90,9 @@ class Program
             connection.Open();
             var tableCmd = connection.CreateCommand();
             tableCmd.CommandText =
-                $"SELECT * FROM drink_water";
+                $"SELECT * FROM habits";
 
-            List<DrinkWater> tableData = new List<DrinkWater>();
+            List<HabitLog> tableData = new List<HabitLog>();
             SqliteDataReader reader = tableCmd.ExecuteReader();
 
             if (reader.HasRows)
@@ -97,7 +100,7 @@ class Program
                 while (reader.Read())
                 {
                     tableData.Add(
-                        new DrinkWater
+                        new HabitLog
                         {
                             Id = reader.GetInt32(0),
                             Date = DateTime.ParseExact(reader.GetString(1), "dd-MM-yy", new CultureInfo("en-US")),
@@ -115,7 +118,7 @@ class Program
             Console.WriteLine("----------------------------------------------------------------------------");
             foreach (var dw in tableData)
             {
-                Console.WriteLine($"{dw.Id} - {dw.Date.ToString("dd-MMM-yy")} - Quantity: { dw.Quantity}");
+                Console.WriteLine($"{dw.Id} - {dw.Name}  - {dw.Habit} - {dw.Date.ToString("dd-MMM-yy")} - Quantity: { dw.Quantity}");
             }
             Console.WriteLine("-----------------------------------------------------------------------------");
         }
@@ -124,14 +127,17 @@ class Program
     {
         Console.Clear();
         string date = GetDateInput();
-        int quantity = GetNumberInput("Please insert the number of glasses");
+        int quantity = GetNumberInput("Please insert the amount of times you performed the habit");
+        string unit = GetMeasurementInput();
+        string name = GetNameInput();
+        string habit = GetHabitInput();
 
         using(var connection = new SqliteConnection(connectionString))
         {
             connection.Open();
             var tableCmd = connection.CreateCommand();
             tableCmd.CommandText =
-                $"INSERT INTO drink_water(date, quantity) VALUES('{date}',{quantity})";
+                $"INSERT INTO habits(date, name, habit, quantity) VALUES('{date}','{name}','{habit}',{quantity},'{unit}')";
             tableCmd.ExecuteNonQuery();
 
             connection.Close();
@@ -139,7 +145,11 @@ class Program
              
     }
 
-    
+    private static string GetMeasurementInput()
+    {
+        throw new NotImplementedException();
+    }
+
     private static void Update()
     {
         GetAllRecords();
@@ -163,12 +173,13 @@ class Program
                  }
 
                 string date = GetDateInput();
-
-                int quantity = GetNumberInput("Please enter the number of glasses");
+                int quantity = GetNumberInput("Please enter the number of times you performed the habit");
+                string name = GetNameInput();
+                string habit = GetHabitInput();
 
                 var tableCmd = connection.CreateCommand();
             
-                tableCmd.CommandText = $"UPDATE drink_water SET date = '{date}', quantity = {quantity} WHERE Id = {dataId}";
+                tableCmd.CommandText = $"UPDATE drink_water SET date = '{date}',name = '{name}', habit = '{habit}', quantity = {quantity} WHERE Id = {dataId}";
 
                 tableCmd.ExecuteNonQuery();
 
@@ -241,13 +252,37 @@ class Program
 
     }
 
+    private static string GetHabitInput()
+    {
+        Console.WriteLine("Enter habit here");
+        var habitInput = Console.ReadLine();    
+        if(habitInput == "0") GetUserInput();
+
+        return habitInput;
+
+    }
+
+    private static string GetNameInput()
+    {
+        Console.WriteLine("What is your name?");
+        var nameInput = Console.ReadLine();
+        if(nameInput == "0") GetNameInput();
+
+        return nameInput;
+    }
+
+
 }
 
-public class DrinkWater
+public class HabitLog
 {
     public int Id { get; set; }
 
     public DateTime Date { get; set; }
+
+    public string Name { get; set; }
+
+    public string Habit { get; set; }
 
     public int Quantity { get; set; }
 
